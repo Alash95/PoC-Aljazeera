@@ -234,7 +234,7 @@ if st.session_state.stage == "welcome":
 
 elif st.session_state.stage == "region":
     add_bot_message_once("region_msg", "🌍 Please choose a region:")
-    
+
     cols = st.columns(3)
     for i, region in enumerate(REGIONS):
         if cols[i % 3].button(region, key=f"region_btn_{i}"):
@@ -242,16 +242,17 @@ elif st.session_state.stage == "region":
             st.session_state.region = region
             st.session_state.stage = "topic"
             st.rerun()
-    
+
     # Back button
-    if st.button("⬅️ Back to Mode Selection", key="back_from_region"):
+    if st.button("⬅️ Back", key="back_from_region"):
         st.session_state.stage = "welcome"
         st.rerun()
 
 
 elif st.session_state.stage == "topic":
-    add_bot_message_once("topic_msg", f"📰 Now select a topic in {st.session_state.region}:")
-    
+    add_bot_message_once(
+        "topic_msg", f"📰 Now select a topic in {st.session_state.region}:")
+
     cols = st.columns(3)
     for i, topic in enumerate(TOPICS):
         if cols[i % 3].button(topic, key=f"topic_btn_{i}"):
@@ -259,9 +260,9 @@ elif st.session_state.stage == "topic":
             st.session_state.topic = topic
             st.session_state.stage = "predefined_output"
             st.rerun()
-    
+
     # Back button
-    if st.button("⬅️ Back to Mode Selection", key="back_from_topic"):
+    if st.button("⬅️ Back", key="back_from_topic"):
         st.session_state.stage = "welcome"
         st.rerun()
 
@@ -280,7 +281,8 @@ elif st.session_state.stage == "predefined_output":
     st.rerun()
 
 elif st.session_state.stage == "custom":
-    add_bot_message_once("custom_prompt", "✍️ What would you like to know about the news?")
+    add_bot_message_once(
+        "custom_prompt", "✍️ What would you like to know about the news?")
     col1, col2 = st.columns([4, 1])
     with col1:
         question = st.text_input("Your question:", key="custom_input_final")
@@ -390,11 +392,11 @@ elif st.session_state.stage == "menu":
         st.session_state.stage = "welcome"
         st.session_state.bot_flags = set()
         st.rerun()
-    if col2.button("➕ New Search"):
+    if col2.button("➕ Predefined Topic"):
         st.session_state.stage = "region"
         st.session_state.bot_flags = set()
         st.rerun()
-    if col3.button("⬅️ Back to Mode Selection"):
+    if col3.button("⬅️ Back"):
         st.session_state.stage = "welcome"
         st.session_state.bot_flags = set()
         st.rerun()
