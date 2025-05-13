@@ -360,7 +360,7 @@ elif st.session_state.stage == "topic":
 elif st.session_state.stage == "predefined_output":
     query = f"{st.session_state.topic} in {st.session_state.region}"
     add_bot_message_once("pre_output_msg", f"🔍 Fetching news for {query}...")
-    results = search_similar_articles(query, k=6)
+    results = search_similar_articles(query, k=3)
     if results.empty:
         add_bot_message_once(
             "no_articles", "❌ No articles found for this topic.")
