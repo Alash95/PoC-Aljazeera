@@ -243,11 +243,6 @@ elif st.session_state.stage == "region":
             st.session_state.stage = "topic"
             st.rerun()
 
-    # Back button
-    if st.button("⬅️ Back", key="back_from_region"):
-        st.session_state.stage = "welcome"
-        st.rerun()
-
 
 elif st.session_state.stage == "topic":
     add_bot_message_once(
@@ -260,11 +255,6 @@ elif st.session_state.stage == "topic":
             st.session_state.topic = topic
             st.session_state.stage = "predefined_output"
             st.rerun()
-
-    # Back button
-    if st.button("⬅️ Back", key="back_from_topic"):
-        st.session_state.stage = "welcome"
-        st.rerun()
 
 elif st.session_state.stage == "predefined_output":
     query = f"{st.session_state.topic} in {st.session_state.region}"
@@ -384,23 +374,23 @@ elif st.session_state.stage == "custom":
             st.session_state.stage = "menu"
             st.rerun()
 
-elif st.session_state.stage == "menu":
-    st.markdown("---")
-    st.subheader("🔁 What would you like to do next?")
-    col1, col2, col3 = st.columns(3)
-    if col1.button("🔄 Restart Chat"):
-        st.session_state.chat = []
-        st.session_state.stage = "welcome"
-        st.session_state.bot_flags = set()
-        st.rerun()
-    if col2.button("➕ Predefined Topic"):
-        st.session_state.stage = "region"
-        st.session_state.bot_flags = set()
-        st.rerun()
-    if col3.button("⬅️ Back"):
-        st.session_state.stage = "welcome"
-        st.session_state.bot_flags = set()
-        st.rerun()
+# elif st.session_state.stage == "menu":
+#     st.markdown("---")
+#     st.subheader("🔁 What would you like to do next?")
+#     col1, col2, col3 = st.columns(3)
+#     if col1.button("🔄 Restart Chat"):
+#         st.session_state.chat = []
+#         st.session_state.stage = "welcome"
+#         st.session_state.bot_flags = set()
+#         st.rerun()
+#     if col2.button("➕ Predefined Topic"):
+#         st.session_state.stage = "region"
+#         st.session_state.bot_flags = set()
+#         st.rerun()
+#     if col3.button("⬅️ Back"):
+#         st.session_state.stage = "welcome"
+#         st.session_state.bot_flags = set()
+#         st.rerun()
 
 st.markdown("---")
 st.markdown("*Powered by JADA Pioneers!*")

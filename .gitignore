@@ -3,3 +3,5 @@
 .venv
 /faiss_store
 /pocvenv
+aljazeera_app_cleaned.py
+
