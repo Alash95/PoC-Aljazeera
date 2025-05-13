@@ -341,16 +341,17 @@ if st.session_state.stage == "welcome":
 elif st.session_state.stage == "region":
     cols = st.columns(3)
     for i, region in enumerate(REGIONS):
-        if cols[i % 3].button(region, key=f"region_btn_{i}"):
+        if cols[i % 3].button(region, key=f"region_btn_stage_region_{i}"):
             add_user_message(f"Region selected: {region}")
             st.session_state.region = region
             st.session_state.stage = "topic"
             st.rerun()
 
+
 elif st.session_state.stage == "topic":
     cols = st.columns(3)
     for i, topic in enumerate(TOPICS):
-        if cols[i % 3].button(topic, key=f"topic_btn_{i}"):
+        if cols[i % 3].button(topic, key=f"topic_btn_stage_topic_{i}"):
             add_user_message(f"Topic selected: {topic}")
             st.session_state.topic = topic
             st.session_state.stage = "predefined_output"
