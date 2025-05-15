@@ -101,34 +101,37 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- Safe JSON Loader ---
-def safe_load_json(path):
-    if not os.path.exists(path):
-        return []
-    with open(path, 'r') as f:
-        try:
-            data = json.load(f)
-            if isinstance(data, dict):
-                return [data]
-            return data if isinstance(data, list) else []
-        except json.JSONDecodeError:
-            return []
-
 # --- Display Saved Data in Sidebar ---
 st.sidebar.markdown("---")
 st.sidebar.subheader("📁 Saved Chat History")
-for entry in safe_load_json(CHAT_LOG_PATH)[-3:]:
-    timestamp = entry.get("timestamp", "N/A")
-    msg_count = len(entry.get("chat", []))
-    st.sidebar.markdown(f"- `{timestamp}`: {msg_count} messages")
+if os.path.exists(CHAT_LOG_PATH):
+    with open(CHAT_LOG_PATH, 'r') as f:
+        try:
+            chat_data = json.load(f)
+            if isinstance(chat_data, dict):
+                chat_data = [chat_data]
+        except json.JSONDecodeError:
+            chat_data = []
+    for entry in chat_data[-3:]:
+        timestamp = entry.get("timestamp", "N/A")
+        msg_count = len(entry.get("chat", []))
+        st.sidebar.markdown(f"- `{timestamp}`: {msg_count} messages")
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("📌 Saved Preferences")
-for pref in safe_load_json(PREFS_PATH)[-3:]:
-    ts = pref.get("timestamp", "N/A")
-    region = pref.get("region", "-")
-    topic = pref.get("topic", "-")
-    st.sidebar.markdown(f"- `{ts}`: {region} / {topic}")
+if os.path.exists(PREFS_PATH):
+    with open(PREFS_PATH, 'r') as f:
+        try:
+            prefs_data = json.load(f)
+            if isinstance(prefs_data, dict):
+                prefs_data = [prefs_data]
+        except json.JSONDecodeError:
+            prefs_data = []
+    for pref in prefs_data[-3:]:
+        ts = pref.get("timestamp", "N/A")
+        region = pref.get("region", "-")
+        topic = pref.get("topic", "-")
+        st.sidebar.markdown(f"- `{ts}`: {region} / {topic}")
 
 # --- Session State Initialization ---
 for key, default in {

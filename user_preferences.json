@@ -1,0 +1,34 @@
+[
+  {
+    "default_user": {
+      "region": "Africa",
+      "topic": "Politics",
+      "timestamp": "2025-05-12T22:39:20.820718"
+    }
+  },
+  {
+    "region": "Africa",
+    "topic": "Politics",
+    "timestamp": "2025-05-12T22:52:29.562912"
+  },
+  {
+    "region": "Africa",
+    "topic": "Politics",
+    "timestamp": "2025-05-12T22:54:45.280696"
+  },
+  {
+    "region": "Africa",
+    "topic": "Politics",
+    "timestamp": "2025-05-12T23:17:08.430267"
+  },
+  {
+    "region": "Africa",
+    "topic": "Economy",
+    "timestamp": "2025-05-14T08:28:42.584849"
+  },
+  {
+    "region": "Africa",
+    "topic": "Economy",
+    "timestamp": "2025-05-14T08:29:41.747115"
+  }
+]
