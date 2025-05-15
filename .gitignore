@@ -3,5 +3,10 @@
 .venv
 /faiss_store
 /pocvenv
-aljazeera_app_cleaned.py
+aljazeera_app_alpha.py
+aljazeera_app_beta.py
+aljazeera_app_final.py
+chatbot_engine_alpha.py
+chatbot_engine_final.py
+
 

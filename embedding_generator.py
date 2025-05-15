@@ -8,11 +8,15 @@ openai.api_type = "azure"
 openai.api_version = OPENAI_API_VERSION
 
 def generate_embedding(text):
+    clean_text = str(text).strip()
+    if not clean_text:
+        return []  # Return empty list if the string is empty
     response = openai.Embedding.create(
-        input=[text],
+        input=clean_text,
         engine=EMBEDDING_DEPLOYMENT_NAME
     )
     return response["data"][0]["embedding"]
+
 
 def add_embeddings_to_df(df, text_column="Summary"):
     df["embedding"] = df[text_column].fillna("").apply(generate_embedding)
@@ -22,4 +26,4 @@ if __name__ == "__main__":
     from data_loader import load_csv_from_blob
     df = load_csv_from_blob()
     df = add_embeddings_to_df(df, text_column="Summary")
-    df.to_csv("embedded_news.csv", index=False)
+    df.to_csv("embedded_news_01.csv", index=False)

@@ -1,3 +1,5 @@
+# chatbot_engine_final.py
+
 import openai
 from semantic_search import search_similar_articles
 from config import (
@@ -11,134 +13,79 @@ openai.api_base = OPENAI_ENDPOINT
 openai.api_version = OPENAI_API_VERSION
 openai.api_type = OPENAI_TYPE
 
-# Predefined options
-REGIONS = ["Africa", "Asia", "Europe", "Latin America", "Middle East" , "US & Canada"]
-TOPICS = ["Politics", "Economy", "Climate", "Sports", "Uncategorized"]
-
-# User state
-user_route = None
-selected_region = None
-selected_topic = None
+REGIONS = ["Africa", "Asia", "Europe", "Middle East", "North America", "South America"]
+TOPICS = ["Politics", "Economy", "Sports", "Science", "Technology", "Climate"]
 
 
-def welcome_message():
-    return (
-        "\n👋 Welcome to Al Jazeera News Assistant!\n"
-        "Would you like *predefined topics* or *ask a custom question*?\n"
-        "Type '1' for Predefined Topics or '2' for Custom Question."
-    )
-
-
-def handle_predefined_route():
-    global selected_region, selected_topic
-    if not selected_region:
-        print("\n🌍 What region are you interested in?")
-        for idx, region in enumerate(REGIONS, start=1):
-            print(f"{idx}. {region}")
-        try:
-            choice = int(input("Enter number: "))
-            selected_region = REGIONS[choice - 1]
-        except (IndexError, ValueError):
-            print("Invalid selection. Please try again.")
-            return
-    if not selected_topic:
-        print("\n📰 What type of news are you interested in?")
-        for idx, topic in enumerate(TOPICS, start=1):
-            print(f"{idx}. {topic}")
-        try:
-            choice = int(input("Enter number: "))
-            selected_topic = TOPICS[choice - 1]
-        except (IndexError, ValueError):
-            print("Invalid selection. Please try again.")
-            return
-
-    # Query formulation for search
-    query = f"{selected_topic} in {selected_region}"
-    articles = search_similar_articles(query, k=3)
-    if articles.empty:
-        print("Sorry, no relevant news found.")
-    else:
-        print("\n🗞️ Here are some articles you might find interesting:")
-        for _, row in articles.iterrows():
-            print(f"\n- {row['Headline']}\n  {row['Summary']}\n  🔗 {row['URL']}")
-
-    ask_to_switch()
-
-
-def generate_response(prompt):
+def generate_response(prompt, language="en"):
+    """
+    Search for relevant articles and generate a response only using the database content.
+    """
     try:
-        relevant_passages = search_similar_articles(prompt, k=3)
-        if relevant_passages.empty:
-            return "I'm sorry, I couldn't find any related news in the database."
+        articles = search_similar_articles(prompt, k=3)
+        if articles.empty:
+            return "❌ لا توجد مقالات ذات صلة." if language == "ar" else "❌ No related articles found."
 
-        context = "\n\n".join([
-            f"{row['Headline']} - {row['Summary']} (URL: {row['URL']})"
-            for _, row in relevant_passages.iterrows()
-        ])
+        response_parts = []
+        for _, row in articles.iterrows():
+            entry = f"**{row['Headline']}**\n\n{row['Summary']}\n\n[Read More]({row['URL']})"
+            if language == "ar":
+                entry = translate_to_arabic(entry)
+            response_parts.append(entry)
 
-        full_prompt = (
-            f"Use the following articles as context:\n\n{context}\n\n"
-            f"Now answer this question based only on the provided context:\n{prompt}"
-        )
+        return "\n\n".join(response_parts)
 
+    except Exception as e:
+        return f"❌ Error fetching news: {str(e)}"
+
+
+def translate_to_arabic(text):
+    """
+    Safely translate English text to Arabic using OpenAI with filtering protection.
+    """
+    try:
         response = openai.ChatCompletion.create(
             deployment_id=CHAT_DEPLOYMENT_NAME,
             messages=[
                 {
                     "role": "system",
                     "content": (
-                        "You are a helpful Al Jazeera news assistant. Only provide answers based "
-                        "on Al Jazeera articles provided as context. Cite the article URL in your response."
+                        "You are a professional translator. Only translate the given text from English to Modern Standard Arabic (MSA) "
+                        "in a clear and neutral tone, preserving factual accuracy. Do not generate, summarize, or modify the content."
                     )
                 },
-                {"role": "user", "content": full_prompt}
+                {"role": "user", "content": text}
             ],
             max_tokens=500,
-            temperature=0.7
+            temperature=0.5
         )
-
         return response.choices[0].message["content"]
 
+    except openai.error.InvalidRequestError as e:
+        if "content management policy" in str(e):
+            return "⚠️ لا يمكن ترجمة هذا المحتوى تلقائيًا بسبب السياسات. يرجى مراجعة المحتوى يدويًا."
+        return f"⚠️ خطأ في الترجمة: {e}"
+
     except Exception as e:
-        return f"Error generating response: {str(e)}"
+        return f"⚠️ تعذر الترجمة: {e}"
 
 
-def ask_to_switch():
-    global user_route, selected_region, selected_topic
-    print("\nWould you like to switch modes? Type '1' for Predefined Topics, '2' for Custom Question, or 'exit' to quit.")
-    choice = input("Selection: ").strip()
-    if choice == '1':
-        user_route = 'predefined'
-        selected_region = None
-        selected_topic = None
-    elif choice == '2':
-        user_route = 'custom'
-    elif choice.lower() in ['exit', 'quit']:
-        print("👋 Goodbye! Thanks for using Al Jazeera News Assistant.")
-        exit()
 
+def get_predefined_articles(region, topic, language="en"):
+    """
+    Returns summaries from the database only (no generation), with a read-more link.
+    """
+    query = f"{topic} in {region}"
+    results = search_similar_articles(query, k=3)
 
-if __name__ == "__main__":
-    print(welcome_message())
-    while True:
-        user_input = input("You: ").strip()
+    if results.empty:
+        return [{"role": "bot", "content": "❌ لا توجد مقالات" if language == "ar" else "❌ No articles found for this topic."}]
 
-        if user_input.lower() in ['exit', 'quit']:
-            print("👋 Goodbye! Thanks for using Al Jazeera News Assistant.")
-            break
+    response = []
+    for _, row in results.iterrows():
+        summary = f"**{row['Headline']}**\n\n{row['Summary']}\n\n[Read More]({row['URL']})"
+        if language == "ar":
+            summary = translate_to_arabic(summary)
+        response.append({"role": "bot", "content": summary})
 
-        if user_input == '1':
-            user_route = 'predefined'
-        elif user_input == '2':
-            user_route = 'custom'
-
-        if user_route == 'predefined':
-            handle_predefined_route()
-
-        elif user_route == 'custom':
-            answer = generate_response(user_input)
-            print(f"AI: {answer}")
-            ask_to_switch()
-
-        else:
-            print("Please select a valid route: Type '1' for Predefined Topics or '2' for Custom Question.")
+    return response
