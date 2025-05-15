@@ -4,7 +4,7 @@ import streamlit as st
 import json
 import os
 from datetime import datetime
-from chatbot_engine_final import generate_response, get_predefined_articles, REGIONS, TOPICS
+from chatbot_engine import generate_response, get_predefined_articles, REGIONS, TOPICS
 
 CHAT_LOG_PATH = "chat_history.json"
 PREFS_PATH = "user_preferences.json"
@@ -14,7 +14,8 @@ st.set_page_config(page_title="📰 Al Jazeera News Assistant", layout="centered
 
 # --- Language Selection ---
 st.sidebar.markdown("## 🌐 Language")
-st.session_state.language = st.sidebar.selectbox("Choose a language", ["🇬🇧 English", "🇸🇦 العربية"])
+st.session_state.language = st.sidebar.selectbox(
+    "Choose a language", ["🇬🇧 English", "🇸🇦 العربية"])
 LANG = st.session_state.language
 IS_AR = LANG == "🇸🇦 العربية"
 
@@ -147,7 +148,8 @@ for key, default in {
 # --- Chat Display ---
 st.markdown('<div class="chat-container">', unsafe_allow_html=True)
 for msg in st.session_state.chat:
-    st.markdown(f'<div class="message {msg["role"]}">{msg["content"]}</div>', unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="message {msg["role"]}">{msg["content"]}</div>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
 # --- Translations ---
@@ -184,13 +186,17 @@ TEXTS = {
 T = TEXTS[LANG]
 
 # --- Utilities ---
+
+
 def add_user_message(msg):
     st.session_state.chat.append({"role": "user", "content": msg})
+
 
 def add_bot_message_once(flag, msg):
     if flag not in st.session_state.bot_flags:
         st.session_state.chat.append({"role": "bot", "content": msg})
         st.session_state.bot_flags.add(flag)
+
 
 # --- Chat Logic ---
 if st.session_state.stage == "welcome":
@@ -218,7 +224,8 @@ elif st.session_state.stage == "region":
         st.rerun()
 
 elif st.session_state.stage == "topic":
-    add_bot_message_once("topic_msg", f"{T['choose_topic']} {st.session_state.region}:")
+    add_bot_message_once(
+        "topic_msg", f"{T['choose_topic']} {st.session_state.region}:")
     cols = st.columns(3)
     for i, topic in enumerate(TOPICS):
         if cols[i % 3].button(topic):
@@ -232,7 +239,8 @@ elif st.session_state.stage == "topic":
 
 elif st.session_state.stage == "predefined_output":
     lang_code = "ar" if IS_AR else "en"
-    responses = get_predefined_articles(st.session_state.region, st.session_state.topic, lang_code)
+    responses = get_predefined_articles(
+        st.session_state.region, st.session_state.topic, lang_code)
     st.session_state.chat.extend(responses)
     st.session_state.stage = "menu"
     st.rerun()
