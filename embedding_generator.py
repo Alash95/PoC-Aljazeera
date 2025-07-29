@@ -1,21 +1,33 @@
 import openai
+import numpy as np
 import pandas as pd
-from config import OPENAI_API_KEY, OPENAI_ENDPOINT, OPENAI_API_VERSION, EMBEDDING_DEPLOYMENT_NAME
+import os
+from dotenv import load_dotenv
+from openai import AzureOpenAI
 
-openai.api_key = OPENAI_API_KEY
-openai.api_base = OPENAI_ENDPOINT
-openai.api_type = "azure"
-openai.api_version = OPENAI_API_VERSION
+load_dotenv()
+
+AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
+AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
+AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION")
+AZURE_EMBEDDING_DEPLOYMENT = os.getenv("AZURE_EMBEDDING_DEPLOYMENT")
+AZURE_OPENAI_TYPE = os.getenv("AZURE_OPENAI_TYPE")
+
+client = AzureOpenAI(
+    api_key=AZURE_OPENAI_API_KEY,
+    azure_endpoint=AZURE_OPENAI_ENDPOINT,
+    api_version=AZURE_OPENAI_API_VERSION,
+)
 
 def generate_embedding(text):
     clean_text = str(text).strip()
     if not clean_text:
         return []  # Return empty list if the string is empty
-    response = openai.Embedding.create(
+    response = client.embeddings.create(
         input=clean_text,
-        engine=EMBEDDING_DEPLOYMENT_NAME
+        model=AZURE_EMBEDDING_DEPLOYMENT
     )
-    return response["data"][0]["embedding"]
+    return response.data[0].embedding
 
 
 def add_embeddings_to_df(df, text_column="Summary"):

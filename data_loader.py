@@ -1,7 +1,13 @@
 import pandas as pd
 from azure.storage.blob import BlobServiceClient
 import io
-from config import BLOB_CONNECTION_STRING, BLOB_CONTAINER_NAME, BLOB_FILE_NAME
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+BLOB_CONNECTION_STRING = os.getenv("BLOB_CONNECTION_STRING")
+BLOB_CONTAINER_NAME = os.getenv("BLOB_CONTAINER_NAME")
+BLOB_FILE_NAME = os.getenv("BLOB_FILE_NAME")
 
 
 def load_csv_from_blob() -> pd.DataFrame:
