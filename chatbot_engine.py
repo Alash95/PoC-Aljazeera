@@ -1,6 +1,6 @@
 # chatbot_engine_final.py
 
-from openai import AzureOpenAI, OpenAIError, InvalidRequestError
+from openai import AzureOpenAI, OpenAIError
 from semantic_search import search_similar_articles
 import os
 from dotenv import load_dotenv
@@ -66,7 +66,7 @@ def translate_to_arabic(text):
         )
         return response.choices[0].message.content  # ✅ correct for SDK v1+
 
-    except InvalidRequestError as e:
+    except OpenAIError as e:
         if "content management policy" in str(e):
             return "⚠️ لا يمكن ترجمة هذا المحتوى تلقائيًا بسبب السياسات. يرجى مراجعة المحتوى يدويًا."
         return f"⚠️ خطأ في الترجمة: {e}"
