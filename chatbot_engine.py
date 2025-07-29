@@ -1,17 +1,22 @@
 # chatbot_engine_final.py
 
-import openai
+from openai import AzureOpenAI
 from semantic_search import search_similar_articles
-from config import (
-    OPENAI_API_KEY, OPENAI_ENDPOINT, OPENAI_API_VERSION,
-    EMBEDDING_DEPLOYMENT_NAME, OPENAI_TYPE, CHAT_DEPLOYMENT_NAME
-)
+import os
+from dotenv import load_dotenv
 
-# Initialize OpenAI client
-openai.api_key = OPENAI_API_KEY
-openai.api_base = OPENAI_ENDPOINT
-openai.api_version = OPENAI_API_VERSION
-openai.api_type = OPENAI_TYPE
+load_dotenv()
+AZURE_OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+AZURE_OPENAI_ENDPOINT = os.getenv("OPENAI_ENDPOINT")
+AZURE_OPENAI_API_VERSION = os.getenv("OPENAI_API_VERSION")
+AZURE_OPENAI_TYPE = os.getenv("OPENAI_TYPE")
+AZURE_CHAT_DEPLOYMENT_NAME = os.getenv("CHAT_DEPLOYMENT_NAME")
+
+client = AzureOpenAI(
+    api_key=AZURE_OPENAI_API_KEY,
+    azure_endpoint=AZURE_OPENAI_ENDPOINT,
+    api_version=AZURE_OPENAI_API_VERSION,
+)
 
 REGIONS = ["Africa", "Asia", "Europe", "Middle East", "North America", "South America"]
 TOPICS = ["Politics", "Economy", "Sports", "Science", "Technology", "Climate"]
@@ -44,8 +49,8 @@ def translate_to_arabic(text):
     Safely translate English text to Arabic using OpenAI with filtering protection.
     """
     try:
-        response = openai.ChatCompletion.create(
-            deployment_id=CHAT_DEPLOYMENT_NAME,
+        response = client.ChatCompletion.create(
+            deployment_id=AZURE_CHAT_DEPLOYMENT_NAME,
             messages=[
                 {
                     "role": "system",
@@ -61,7 +66,7 @@ def translate_to_arabic(text):
         )
         return response.choices[0].message["content"]
 
-    except openai.error.InvalidRequestError as e:
+    except client.error.InvalidRequestError as e:
         if "content management policy" in str(e):
             return "⚠️ لا يمكن ترجمة هذا المحتوى تلقائيًا بسبب السياسات. يرجى مراجعة المحتوى يدويًا."
         return f"⚠️ خطأ في الترجمة: {e}"
