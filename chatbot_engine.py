@@ -1,15 +1,15 @@
 # chatbot_engine_final.py
 
-from openai import AzureOpenAI
+from openai import AzureOpenAI, OpenAIError, InvalidRequestError
 from semantic_search import search_similar_articles
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
+
 AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
 AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
 AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION")
-AZURE_OPENAI_TYPE = os.getenv("AZURE_OPENAI_TYPE")
 AZURE_CHAT_DEPLOYMENT_NAME = os.getenv("AZURE_CHAT_DEPLOYMENT_NAME")
 
 client = AzureOpenAI(
@@ -46,11 +46,11 @@ def generate_response(prompt, language="en"):
 
 def translate_to_arabic(text):
     """
-    Safely translate English text to Arabic using OpenAI with filtering protection.
+    Safely translate English text to Arabic using Azure OpenAI.
     """
     try:
-        response = client.ChatCompletion.create(
-            deployment_id=AZURE_CHAT_DEPLOYMENT_NAME,
+        response = client.chat.completions.create(
+            model=AZURE_CHAT_DEPLOYMENT_NAME,  # This is your deployment name, not base model
             messages=[
                 {
                     "role": "system",
@@ -64,16 +64,15 @@ def translate_to_arabic(text):
             max_tokens=500,
             temperature=0.5
         )
-        return response.choices[0].message["content"]
+        return response.choices[0].message.content  # ✅ correct for SDK v1+
 
-    except client.error.InvalidRequestError as e:
+    except InvalidRequestError as e:
         if "content management policy" in str(e):
             return "⚠️ لا يمكن ترجمة هذا المحتوى تلقائيًا بسبب السياسات. يرجى مراجعة المحتوى يدويًا."
         return f"⚠️ خطأ في الترجمة: {e}"
 
     except Exception as e:
         return f"⚠️ تعذر الترجمة: {e}"
-
 
 
 def get_predefined_articles(region, topic, language="en"):
