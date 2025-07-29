@@ -1,6 +1,6 @@
 # chatbot_engine_final.py
-
-from openai import AzureOpenAI, OpenAIError
+import openai
+from openai import AzureOpenAI
 from semantic_search import search_similar_articles
 import os
 from dotenv import load_dotenv
@@ -45,12 +45,9 @@ def generate_response(prompt, language="en"):
 
 
 def translate_to_arabic(text):
-    """
-    Safely translate English text to Arabic using Azure OpenAI.
-    """
     try:
         response = client.chat.completions.create(
-            model=AZURE_CHAT_DEPLOYMENT_NAME,  # This is your deployment name, not base model
+            model=AZURE_CHAT_DEPLOYMENT_NAME,
             messages=[
                 {
                     "role": "system",
@@ -64,15 +61,16 @@ def translate_to_arabic(text):
             max_tokens=500,
             temperature=0.5
         )
-        return response.choices[0].message.content  # ✅ correct for SDK v1+
+        return response.choices[0].message.content
 
-    except OpenAIError as e:
+    except openai.OpenAIError as e:  # ✅ fixed here
         if "content management policy" in str(e):
             return "⚠️ لا يمكن ترجمة هذا المحتوى تلقائيًا بسبب السياسات. يرجى مراجعة المحتوى يدويًا."
         return f"⚠️ خطأ في الترجمة: {e}"
 
     except Exception as e:
         return f"⚠️ تعذر الترجمة: {e}"
+
 
 
 def get_predefined_articles(region, topic, language="en"):
